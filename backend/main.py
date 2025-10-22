@@ -4,7 +4,7 @@ from typing import List
 from decimal import Decimal
 import math
 
-from . import models, schemas
+from . import models, maps
 from .database import engine, Base, get_db
 
 
@@ -35,8 +35,8 @@ def compute_route_distance(waypoints): # Calcular la distancia total de una ruta
         )
     return total # Distancia total en metros
 
-@app.post("/routes/", response_model=schemas.RouteRead) # Endpoint para crear una nueva ruta con waypoints
-def create_route(payload: schemas.RouteCreate, db: Session = Depends(get_db)):
+@app.post("/routes/", response_model=maps.RouteRead) # Endpoint para crear una nueva ruta con waypoints
+def create_route(payload: maps.RouteCreate, db: Session = Depends(get_db)):
     if not payload.waypoints or len(payload.waypoints) == 0:
         raise HTTPException(status_code=400, detail="Al menos un waypoint es requerido para crear una ruta.")   
   
@@ -72,12 +72,12 @@ def create_route(payload: schemas.RouteCreate, db: Session = Depends(get_db)):
         pass
 
     return route
-    response = schemas.RouteRead(
+    response = maps.RouteRead(
         id=route.id,
         name=route.name,
         created_at=route.created_at.isoformat() if route.created_at else None,
         distance_m=distance,
-        waypoints=[schemas.WaypointRead(
+        waypoints=[maps.WaypointRead(
             id=w.id,
             order_index=w.order_inde,
             latitude=float(w.latitude),
@@ -87,7 +87,7 @@ def create_route(payload: schemas.RouteCreate, db: Session = Depends(get_db)):
     )
     return response
 
-@app.get("/routes/", response_model=List[schemas.RouteRead]) # Endpoint para listar todas las rutas almacenadas en la base de datos
+@app.get("/routes/", response_model=List[maps.RouteRead]) # Endpoint para listar todas las rutas almacenadas en la base de datos
 def list_routes(db: Session = Depends(get_db)):
     routes = db.query(models.Route).order_by(models.Route.created_at.desc().all()) # Consultar todas las rutas en la base de datos
     results = []
@@ -98,7 +98,7 @@ def list_routes(db: Session = Depends(get_db)):
         name=route.name,
         created_at=route.created_at.isoformat() if route.created_at else None, # Formatear la fecha de creación como una cadena ISO
         distance_m=distance,
-        waypoints=[schemas.WaypointRead( #
+        waypoints=[maps.WaypointRead( #
             id=w.id,
             order_index=w.order_index,
             latitude=float(w.latitude),
@@ -107,34 +107,35 @@ def list_routes(db: Session = Depends(get_db)):
         results.append(route) # Agregar la ruta a la lista de resultados
     return results
 
-@app.get("/routes/{route_id}", response_model=schemas.RouteRead) # Endpoint para obtener los detalles de una ruta específica por su ID
+@app.get("/routes/{route_id}", response_model=maps.RouteRead) # Endpoint para obtener los detalles de una ruta específica por su ID
 def get_route(route_id: int, db: Session = Depends(get_db)):
     route = db.query(models.Route).filter(models.Route.id == route_id).first() # Consultar la ruta por su ID
     if not route:
         raise HTTPException(status_code=404, detail="Ruta no encontrada.") # Manejar el caso en que la ruta no existe
     distance = compute_route_distance(route.waypoints) # Calcular la distancia de la ruta
-    return schemas.RouteRead(# Construir la respuesta con los detalles de la ruta 
+    return maps.RouteRead(# Construir la respuesta con los detalles de la ruta 
         id=route.id,
         name=route.name,
         created_at=route.created_at.isoformat() if route.created_at else None, 
         distance_m=distance,
-        waypoints=[schemas.WaypointRead(
+        waypoints=[maps.WaypointRead(
             id=w.id,
             order_index=w.order_index,
             latitude=float(w.latitude),
             longitude=float(w.longitude)
         ) for w in route.waypoints]
-    )
+    )           
+
     route.distance = float(distance)
     db.add(route)
     db.commit()
     db.refresh(route)
-    response = schemas.RouteRead( # Construir la respuesta con los detalles de la ruta
+    response = maps.RouteRead( # Construir la respuesta con los detalles de la ruta
         id=route.id,
         name=route.name,
         created_at=route.created_at.isoformat() if route.created_at else None,
         distance_m=distance,
-        waypoints=[schemas.WaypointRead(
+        waypoints=[maps.WaypointRead(
             id=w.id,
             order_index=w.order_index,
             latitude=float(w.latitude),
