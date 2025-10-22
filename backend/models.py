@@ -1,32 +1,23 @@
-from typing import List, Optional
-from pydantic import BaseModel, condecimal, Field
+from sqlalchemy import Column, Integer, String, Numeric, ForeignKey, DateTime
+from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
+from .database import Base
+
+# Creamos las tablas de la base de datos usando SQLAlchemy ORM
+
+class Route(Base): 
+    __tablename__ = "routes"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(200), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    waypoints = relationship("Waypoint", cascade="all, delete-orphan", back_populates="route", order_by="Waypoint.order_index")
 
 
-class WaypointCreate(BaseModel):
-    order: int
-    latitude: condecimal(gt=-90, lt=90, max_digits=10, decimal_places=8)  # Latitud entre -90 y 90
-    longitude: condecimal(gt=-180, lt=180, max_digits=11, decimal_places=8)  # Longitud entre -180 y 180
-    order: int = Field(..., ge=0)  # Índice de orden no negativo
-
-class RouteCreate(BaseModel):
-    name: str
-    waypoints: List[WaypointCreate] 
-
-class WaypointRead(BaseModel):
-    id: int
-    order_index: int
-    latitude: float
-    longitude: float
-
-class Config:
-        orm_mode = True
-
-class RouteRead(BaseModel):
-    id: int
-    name: str
-    created_at: Optional[str] = None
-    distance_m: Optional[float] = None
-    waypoints: List[WaypointRead] 
-
-    class Config:
-        orm_mode = True
+class Waypoint(Base):
+    __tablename__ = "waypoints"
+    id = Column(Integer, primary_key=True, index=True)
+    latitude = Column(Numeric(10, 8), nullable=False)
+    longitude = Column(Numeric(11, 8), nullable=False)
+    order_index = Column(Integer, nullable=False)
+    route_id = Column(Integer, ForeignKey("routes.id"), nullable=False)
+    route = relationship("Route", back_populates="waypoints")
