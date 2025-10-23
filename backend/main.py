@@ -49,10 +49,10 @@ def create_route(payload: maps.RouteCreate, db: Session = Depends(get_db)):
     for idx, wp in enumerate(sorted_wps):
         wp_obj = models.Waypoint(  # Crear una nueva instancia de Waypoint
             route_id=route.id, # ID de la ruta a la que pertenece el waypoint
-            order=wp.order, # orden del waypoint
+            order_index=wp.order_index, # orden del waypoint
             latitude=wp.latitude, # latitud del waypoint
             longitude=wp.longitude,  # longitud del waypoint
-            order_index=wp.order  # índice de orden para mantener la secuencia de waypoints
+            order_index=wp.order_index  # índice de orden para mantener la secuencia de waypoints
         )
         db.add(wp_obj)
         wp_objs.append(wp_obj)

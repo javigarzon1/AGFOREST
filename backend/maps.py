@@ -10,7 +10,7 @@ Longitude = Annotated[Decimal, Field(gt=-180, lt=180, max_digits=11, decimal_pla
 class WaypointCreate(BaseModel): # Modelo para crear un waypoint
     latitude: Latitude
     longitude: Longitude
-    order: int = Field(..., ge=0)
+    order_index: int = Field(..., ge=0)
 
 class RouteCreate(BaseModel): # Modelo para crear una ruta
     name: str
