@@ -10,3 +10,8 @@ export async function createRoute(data) {
   });
   return response.json();
 }
+export async function getRoute(id) {
+  const response = await fetch(`${API_BASE} api/routes/${id}/`);
+  return response.json();
+}
+
