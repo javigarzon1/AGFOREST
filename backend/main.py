@@ -4,7 +4,7 @@ from typing import List
 from decimal import Decimal
 import math
 
-from . import models, maps
+from backend import models, maps
 from .database import engine, Base, get_db
 
 
