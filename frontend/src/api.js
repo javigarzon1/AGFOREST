@@ -15,3 +15,7 @@ export async function getRoute(id) {
   return response.json();
 }
 
+export async function listRoutes() {
+  const response = await fetch(`${API_BASE} api/routes/`);
+  return response.json();
+}
