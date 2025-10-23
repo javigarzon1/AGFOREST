@@ -5,17 +5,48 @@ const waypointsDiv = document.getElementById("waypoints");
 const listUl = document.getElementById("route");
 const detalSection = document.getElementById("route-details");
 const routeInfo = document.getElementById("route-info");
+const waypointList = document.getElementById("waypoint-list");
+const closeDetailsBtn = document.getElementById("close-details-btn");
 
 let waypointCount = 0;
 
 
-function createWaypointInput() {
+function createWaypointInput(index) {
     waypointCount += 1;
     const div = document.createElement("div");
     div.className = "waypoint-input";
     div.innerHTML = `
-        <label for="waypoint-${waypointCount}">Waypoint ${waypointCount}:</label>
-        <input type="text" id="waypoint-${waypointCount}" name="waypoints" required>
+        <input type="number" step="0.0001" placeholder="Latitud" name="lat-${index}" required />
+        <input type="number" step="0.0001" placeholder="Longitud" name="lng-${index}" required />
         <button type="button" class="remove-waypoint-btn">Remove</button>
     `;
-    waypointsDiv.appendChild(div);
+    div.querySelector(".remove").addEventListener("click", () => div.remove());
+    return div;
+}
+addBtn.addEventListener("click", () => {
+waypointsDiv.appendChild(createWaypointInput(waypointCount));});
+
+
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = document.getElementById("route-name").value;
+const waypoints = Array.from(waypointsDiv.querySelectorAll(".waypoint")).map((wp, i) => {
+    const lat = parseFloat(wp.querySelector(`input[name="lat-${i}"]`).value);
+    const lng = parseFloat(wp.querySelector(`input[name="lng-${i}"]`).value);
+    return { latitude: lat, longitude: lng, order: i + 1 };
+});
+    const response = await fetch(`${API_BASE}/api/routes/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({name, waypoints}),
+    });
+    if (response.ok) {
+        alert("¡Ruta creada satisfactoriamente!");
+        form.reset();
+        waypointsDiv.innerHTML = "";
+        loadRoutes();
+    } else {
+        alert("Error en la ruta.");
+    }   
+});
