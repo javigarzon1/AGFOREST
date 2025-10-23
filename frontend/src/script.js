@@ -31,12 +31,11 @@ waypointsDiv.appendChild(createWaypointInput(waypointCount));});
 form.addEventListener("submit", async (e) => { //
     e.preventDefault();
     const name = document.getElementById("route-name").value;
-    const waypoints = Array.from(waypointsDiv.querySelectorAll(".waypoint")).map(wp, i) => { // Recolectar datos de waypoints
-        const lat = parseFloat(wp.querySelector(`input[name="lat-${i}"]`).value);
-        const lng = parseFloat(wp.querySelector(`input[name="lng-${i}"]`).value);
-        return { latitude: lat, longitude: lng, order: i + 1 };
-    }
-);
+const waypoints = Array.from(waypointsDiv.querySelectorAll(".waypoint-input")).map((wp, i) => { // Recolectar datos de waypoints
+    const lat = parseFloat(wp.querySelector(`input[name="lat-${i}"]`).value);
+    const lng = parseFloat(wp.querySelector(`input[name="lng-${i}"]`).value);
+    return { latitude: lat, longitude: lng, order: i + 1 };
+});
     const response = await fetch(`${API_BASE}/api/routes/`, { // Enviar datos al backend
         method: "POST",
         headers: { "Content-Type": "application/json" },
