@@ -1,4 +1,4 @@
-# REquerimientos técnicos para el backend de la aplicación
+# Requerimientos técnicos para el backend de la aplicación
 
 fastapi==0.95.2
 uvicorn[standard]==0.22.0
